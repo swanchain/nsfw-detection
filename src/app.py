@@ -1,11 +1,13 @@
 import os
 import requests
-from io import BytesIO
 import re
 import traceback
+import requests
+from io import BytesIO
+
+import torch
 from flask import Flask, request, jsonify
 from PIL import Image
-import torch
 from transformers import AutoModelForImageClassification, ViTImageProcessor
 
 app = Flask(__name__)
@@ -19,20 +21,53 @@ processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',d
 with open(f'{dir_path}/../block.txt', 'r') as f:
     block_list = f.read().splitlines()
 
+from PIL import Image
+import torch
+import traceback
+
 def porn_img_detect(image: Image.Image):
+    """
+    Detects if an image contains pornographic content.
+
+    Args:
+        image (PIL.Image.Image): The input image to be analyzed.
+
+    Returns:
+        str: The predicted label for the image. It can be either 'porn' or 'not_porn'.
+
+    Raises:
+        Exception: If an error occurs during the detection process.
+    """
     try:
         with torch.no_grad():
+            # Preprocess the image
             inputs = processor(images=image, return_tensors="pt")
+
+            # Perform inference
             outputs = model(**inputs)
             logits = outputs.logits
 
+        # Get the predicted label
         predicted_label = logits.argmax(-1).item()
+
+        # Return the corresponding label
         return model.config.id2label[predicted_label]
     except Exception as e:
         traceback.print_exc()
         return str(e)
 
+import re
+
 def porn_link_detection(link):
+    """
+    Detects if a given link is blacklisted.
+
+    Args:
+        link (str): The link to be checked.
+
+    Returns:
+        bool: True if the link is blacklisted, False otherwise.
+    """
     link = re.sub(r'^https?:\/\/', '', link)
     link = re.sub(r'^www\.', '', link)
     
@@ -42,7 +77,17 @@ def porn_link_detection(link):
             return True
     return False
 
+
 def is_porn_image_url(url):
+    """
+    Checks if the given image URL contains pornographic content.
+
+    Args:
+        url (str): The URL of the image to be analyzed.
+
+    Returns:
+        bool: True if the image is classified as pornographic, False otherwise.
+    """
     try:
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
@@ -79,4 +124,5 @@ def link_endpoint():
     return jsonify({'result': res})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # TODO: Specify host and port for the Flask app
+    app.run(debug=True,host="0.0.0.0")
