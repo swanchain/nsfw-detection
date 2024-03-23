@@ -32,4 +32,8 @@ To run the project as a Docker application, follow these steps:
 
 5. Send your curl request to `http://localhost:5000/link` to access the application.
 
+    ```bash
+    curl -X POST -H "Content-Type: application/json" -d '{"link":["www.example.com"]}' http://localhost:5000/link
+    ```
+
 
