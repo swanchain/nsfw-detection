@@ -1,6 +1,7 @@
 # Web3 Porn Detection Project
 
 This project aims to develop a web-based application for detecting and filtering pornographic content using the Vision Transformer (ViT) model.
+The websites on the blacklist (block.txt) are acquired by [Bon-Appetit](https://github.com/Bon-Appetit/porn-domains)
 
 ## Docker Application
 
