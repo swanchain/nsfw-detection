@@ -1,0 +1,5 @@
+flask
+requests
+Pillow
+torch
+transformers
