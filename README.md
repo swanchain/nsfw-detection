@@ -1,7 +1,8 @@
 # Web3 Porn Detection Project
 
 This project aims to develop a web-based application for detecting and filtering pornographic content using the Vision Transformer (ViT) model.
-The websites on the blacklist (block.txt) are acquired by [Bon-Appetit](https://github.com/Bon-Appetit/porn-domains)
+The websites on the blacklist (block.txt) were acquired by [Bon-Appetit](https://github.com/Bon-Appetit/porn-domains)
+The ViT model was built by [Falconsai](https://huggingface.co/Falconsai/nsfw_image_detection)
 
 ## Docker Application
 
