@@ -17,7 +17,7 @@ To run the project as a Docker application, follow these steps:
 2. Navigate to the project directory:
 
     ```bash
-    cd porn_detection/vit_based
+    cd porn_detection/
     ```
 
 3. Build the Docker image:
