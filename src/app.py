@@ -4,6 +4,7 @@ import re
 import traceback
 import requests
 from io import BytesIO
+from urllib.parse import urlparse
 
 import torch
 from flask import Flask, request, jsonify
@@ -68,11 +69,16 @@ def porn_link_detection(link):
     Returns:
         bool: True if the link is blacklisted, False otherwise.
     """
+    print("Link:", link)
+    domain_link = urlparse(link).netloc 
+    
+    link = domain_link if len(domain_link) > 0 else link
+        
     link = re.sub(r'^https?:\/\/', '', link)
     link = re.sub(r'^www\.', '', link)
-    
+    print("Link:", link)
     for block_link in block_list:
-        if block_link in link:
+        if block_link == link:
             print("Input link: ", link, "\nBlack-listed link: ",block_link, "\n+=+=+=+=+=+=")
             return True
     return False
