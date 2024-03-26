@@ -21,7 +21,7 @@ processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',d
 # Load porn website lists
 with open(f'{dir_path}/../block.txt', 'r') as f:
     block_list = f.read().splitlines()
-
+    block_list = dict(zip(block_list, [True]*len(block_list)))
 from PIL import Image
 import torch
 import traceback
@@ -77,10 +77,13 @@ def porn_link_detection(link):
     link = re.sub(r'^https?:\/\/', '', link)
     link = re.sub(r'^www\.', '', link)
     print("Link:", link)
-    for block_link in block_list:
-        if block_link == link:
-            print("Input link: ", link, "\nBlack-listed link: ",block_link, "\n+=+=+=+=+=+=")
+    try:
+        if block_list[link]:
+            print(f"Link: {link} is blocked")
             return True
+    except KeyError:
+        print(f"Link: {link} is not blocked")
+        return False
     return False
 
 
@@ -96,7 +99,7 @@ def is_porn_image_url(url):
     """
     try:
         response = requests.get(url)
-        image = Image.open(BytesIO(response.content))
+        image = Image.open(BytesIO(response.content)).convert("RGB")
         print("Analyzing image using ViT model")
         res = porn_img_detect(image)
         return res == "nsfw"
@@ -122,10 +125,12 @@ def link_endpoint():
     # First check if the link contains an image file
     res = []
     for link in links:
-        is_porn = is_porn_image_url(link)
-        if not is_porn:
-            is_porn = porn_link_detection(link)
-        res.append(is_porn)
+        is_porn = porn_link_detection(link)
+        if is_porn:
+            res.append({"is_nsfw_link": True, "is_nsfw_image": None})
+        else:
+            res.append({"is_nsfw_link": False, "is_nsfw_image": is_porn_image_url(link)})
+        
         
     return jsonify({'result': res})
 
