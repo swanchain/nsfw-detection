@@ -69,7 +69,7 @@ def porn_link_detection(link):
     Returns:
         bool: True if the link is blacklisted, False otherwise.
     """
-    print("Link:", link)
+    
     domain_link = urlparse(link).netloc 
     
     link = domain_link if len(domain_link) > 0 else link
@@ -100,9 +100,16 @@ def is_porn_image_url(url):
     try:
         response = requests.get(url)
         image = Image.open(BytesIO(response.content)).convert("RGB")
-        print("Analyzing image using ViT model")
+        
         res = porn_img_detect(image)
-        return res == "nsfw"
+        if res == "nsfw":
+            # Put the domain link in the block list
+            domain_link = urlparse(url).netloc 
+            link = domain_link if len(domain_link) > 0 else url
+            block_list[link] = True
+            
+            return True
+        return False
     except Exception:
         return False
 
