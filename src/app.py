@@ -22,9 +22,6 @@ processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',d
 with open(f'{dir_path}/../block.txt', 'r') as f:
     block_list = f.read().splitlines()
     block_list = dict(zip(block_list, [True]*len(block_list)))
-from PIL import Image
-import torch
-import traceback
 
 def porn_img_detect(image: Image.Image):
     """
