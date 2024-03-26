@@ -99,14 +99,7 @@ def is_porn_image_url(url):
         image = Image.open(BytesIO(response.content)).convert("RGB")
         
         res = porn_img_detect(image)
-        if res == "nsfw":
-            # Put the domain link in the block list
-            domain_link = urlparse(url).netloc 
-            link = domain_link if len(domain_link) > 0 else url
-            block_list[link] = True
-            
-            return True
-        return False
+        return res == "nsfw"
     except Exception:
         return False
 
