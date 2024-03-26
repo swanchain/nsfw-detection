@@ -38,4 +38,24 @@ To run the project as a Docker application, follow these steps:
     curl -X POST -H "Content-Type: application/json" -d '{"link":["www.example.com"]}' http://localhost:5000/link
     ```
 
+### Sample output  
+```
+{
+  "result": [
+    {
+      "is_nsfw_image": false,
+      "is_nsfw_link": false
+    },
+    {
+      "is_nsfw_image": null,
+      "is_nsfw_link": true
+    },
+    {
+      "is_nsfw_image": null,
+      "is_nsfw_link": true
+    }
+  ]
+}
+```
+
 
