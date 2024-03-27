@@ -15,8 +15,8 @@ app = Flask(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Load Model
-model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_detection", device_map="auto")
-processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="auto")
+model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_detection", device_map="cpu")
+processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="cpu")
 
 # Load porn website lists
 with open(f'{dir_path}/../block.txt', 'r') as f:
@@ -47,9 +47,9 @@ def porn_img_detect(image: Image.Image):
 
         # Get the predicted label
         predicted_label = logits.argmax(-1).item()
-
+        
         # Return the corresponding label
-        return model.config.id2label[predicted_label]
+        return model.config.id2label[predicted_label], logits.softmax(-1).max().item()
     except Exception as e:
         traceback.print_exc()
         return str(e)
@@ -98,10 +98,10 @@ def is_porn_image_url(url):
         response = requests.get(url)
         image = Image.open(BytesIO(response.content)).convert("RGB")
         
-        res = porn_img_detect(image)
-        return res == "nsfw"
+        res, prob = porn_img_detect(image)
+        return res == "nsfw", prob
     except Exception:
-        return False
+        return False, None
 
 @app.route('/link', methods=['POST'])
 def link_endpoint():
@@ -124,10 +124,11 @@ def link_endpoint():
     for link in links:
         is_porn = porn_link_detection(link)
         if is_porn:
-            res.append({"is_nsfw_link": True, "is_nsfw_image": None})
+            res.append({"link": link,"is_nsfw_link": True, "is_nsfw_image": None, "probability": 100})
         else:
-            res.append({"is_nsfw_link": False, "is_nsfw_image": is_porn_image_url(link)})
-        
+            is_porn_image, prob = is_porn_image_url(link)
+            print(prob)
+            res.append({"link": link, "is_nsfw_link": False, "is_nsfw_image": is_porn_image, "probability": prob})
         
     return jsonify({'result': res})
 
