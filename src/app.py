@@ -16,6 +16,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Load Model
 model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_detection", device_map="cuda")
+print("device:", model.device)
 processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="cuda")
 
 # Load porn website lists
