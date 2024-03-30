@@ -15,8 +15,8 @@ app = Flask(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Load Model
-model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_detection", device_map="cpu")
-processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="cpu")
+model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_detection", device_map="cuda")
+processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="cuda")
 
 # Load porn website lists
 with open(f'{dir_path}/../block.txt', 'r') as f:
@@ -39,7 +39,7 @@ def porn_img_detect(image: Image.Image):
     try:
         with torch.no_grad():
             # Preprocess the image
-            inputs = processor(images=image, return_tensors="pt")
+            inputs = processor(images=image, return_tensors="pt").to(model.device)
 
             # Perform inference
             outputs = model(**inputs)
