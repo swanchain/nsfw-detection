@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 import re
 import traceback
@@ -10,6 +11,7 @@ import torch
 from flask import Flask, request, jsonify
 from PIL import Image
 from transformers import AutoModelForImageClassification, ViTImageProcessor
+from ipfs_cid import cid_sha256_hash
 
 app = Flask(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -23,6 +25,11 @@ processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',d
 with open(f'{dir_path}/../block.txt', 'r') as f:
     block_list = f.read().splitlines()
     block_list = dict(zip(block_list, [True]*len(block_list)))
+    
+if os.path.isfile(f"{dir_path}/cids.json"):
+    cids = json.load(open(f"{dir_path}/cids.json"))
+else:
+    cids = dict()
 
 def porn_img_detect(image: Image.Image):
     """
@@ -97,12 +104,19 @@ def is_porn_image_url(url):
     """
     try:
         response = requests.get(url)
+        
+        mhash_base58_2 = cid_sha256_hash(response.content)
+        
+        if mhash_base58_2 in cids:
+            return cids[mhash_base58_2]["is_nsfw_image"], cids[mhash_base58_2]["probability"], mhash_base58_2
+        
         image = Image.open(BytesIO(response.content)).convert("RGB")
         
         res, prob = porn_img_detect(image)
-        return res == "nsfw", prob
-    except Exception:
-        return False, None
+        return res == "nsfw", prob, mhash_base58_2
+    except Exception as e:
+        print(e)
+        return False, None, None
 @app.route('/', methods=['GET'])
 def index():
     return "NSFW Content Filter"
@@ -126,14 +140,13 @@ def link_endpoint():
     # First check if the link contains an image file
     res = []
     for link in links:
-        is_porn = porn_link_detection(link)
-        if is_porn:
-            res.append({"link": link,"is_nsfw_link": True, "is_nsfw_image": None, "probability": 100})
-        else:
-            is_porn_image, prob = is_porn_image_url(link)
-            print(prob)
-            res.append({"link": link, "is_nsfw_link": False, "is_nsfw_image": is_porn_image, "probability": prob})
+        is_porn_image, prob, cid = is_porn_image_url(link)
         
+        res.append({"link": link, "cid": cid, "is_nsfw_image": is_porn_image, "probability": prob})
+        if cid not in cids:
+            cids[cid] = {"is_nsfw_image": is_porn_image, "probability": prob}
+        
+    json.dump(cids, open(f"{dir_path}/cids.json", "w"), indent=2)
     return jsonify({'result': res})
 
 if __name__ == '__main__':
