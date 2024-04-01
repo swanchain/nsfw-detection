@@ -103,6 +103,9 @@ def is_porn_image_url(url):
         return res == "nsfw", prob
     except Exception:
         return False, None
+@app.route('/', methods=['GET'])
+def index():
+    return "NSFW Content Filter"
 
 @app.route('/link', methods=['POST'])
 def link_endpoint():
