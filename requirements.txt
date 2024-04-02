@@ -1,4 +1,5 @@
 ipfs-cid
+py_ipfs_cid
 flask
 requests
 Pillow

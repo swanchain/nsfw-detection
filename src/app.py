@@ -12,6 +12,7 @@ from flask import Flask, request, jsonify
 from PIL import Image
 from transformers import AutoModelForImageClassification, ViTImageProcessor
 from ipfs_cid import cid_sha256_hash
+from py_ipfs_cid import compute_cid
 
 app = Flask(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -105,7 +106,7 @@ def is_porn_image_url(url):
     try:
         response = requests.get(url)
         
-        mhash_base58_2 = cid_sha256_hash(response.content)
+        mhash_base58_2 = compute_cid(response.content)
         
         if mhash_base58_2 in cids:
             return cids[mhash_base58_2]["is_nsfw_image"], cids[mhash_base58_2]["probability"], mhash_base58_2
