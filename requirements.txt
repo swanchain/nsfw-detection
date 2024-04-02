@@ -1,7 +1,7 @@
+ipfs-cid
 flask
 requests
 Pillow
 torch
 transformers
 accelerate
-ipfs-cid
