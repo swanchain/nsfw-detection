@@ -22,10 +22,10 @@ model = AutoModelForImageClassification.from_pretrained("Falconsai/nsfw_image_de
 print("device:", model.device)
 processor = ViTImageProcessor.from_pretrained('Falconsai/nsfw_image_detection',device_map="cuda")
 
-# Load porn website lists
-with open(f'{dir_path}/../block.txt', 'r') as f:
-    block_list = f.read().splitlines()
-    block_list = dict(zip(block_list, [True]*len(block_list)))
+# # Load porn website lists
+# with open(f'{dir_path}/../block.txt', 'r') as f:
+#     block_list = f.read().splitlines()
+#     block_list = dict(zip(block_list, [True]*len(block_list)))
     
 if os.path.isfile(f"{dir_path}/cids.json"):
     cids = json.load(open(f"{dir_path}/cids.json"))
@@ -106,15 +106,15 @@ def is_porn_image_url(url):
     try:
         response = requests.get(url)
         
-        mhash_base58_2 = compute_cid(response.content)
+        v0cid = compute_cid(response.content)
         
-        if mhash_base58_2 in cids:
-            return cids[mhash_base58_2]["is_nsfw_image"], cids[mhash_base58_2]["probability"], mhash_base58_2
+        if v0cid in cids:
+            return cids[v0cid]["is_nsfw_image"], cids[v0cid]["probability"], v0cid
         
         image = Image.open(BytesIO(response.content)).convert("RGB")
         
         res, prob = porn_img_detect(image)
-        return res == "nsfw", prob, mhash_base58_2
+        return res == "nsfw", prob, v0cid
     except Exception as e:
         print(e)
         return False, None, None
