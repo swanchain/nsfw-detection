@@ -2,9 +2,13 @@
 
 ### This project aims to develop a web-based application for detecting and filtering NSFW content using the Vision Transformer (ViT) model.  
 
+## NSFW CIDs  
+
+The file [nsfwcids.json](./nsfwcids.json) includes a list of 7K content identifiers (CIDs) that have been classified as Not Safe For Work (NSFW). You are welcome to download and contribute updates to this list.
+
 ## Remote API Service
 
-### We have setup an API that processes any input image link. You can call it using the following code  
+### We have established an API that processes any provided image URL. You can utilize it with the following code snippet:
 
 ```py
 import requests
